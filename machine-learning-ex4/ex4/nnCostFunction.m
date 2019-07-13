@@ -62,25 +62,43 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+X = [ones(m, 1) X];
 
+z_2 = X * Theta1';
+% m (number of samples) x s_l (number of unit), 5000 x 25 in this case 
+a_2 = [ones(size(z_2, 1), 1) sigmoid(z_2)];
+% 5000 x 26
 
+z_3 = a_2 * Theta2';
+% m x k, 5000 x 10
+a_3 = sigmoid(z_3);
 
+original_y = y;
+y = zeros(size(original_y, 1), max(original_y));
+for i = 1:size(original_y,1)
+    y(i, original_y(i)) = 1;
+end
 
+J = mean(sum((-y .* log(a_3) - (1 - y) .* log(1 - a_3)), 2));
 
+beta = (sum((Theta1(:, 2:end) .^ 2)(:)) + sum((Theta2(:, 2:end) .^ 2)(:))) * lambda / (2 * m);
 
-
-
-
-
-
-
-
-
-
-
-
+J += beta;
 
 % -------------------------------------------------------------
+
+delta_3 = a_3 - y; % m x s_3, 5000 x 10
+
+delta_2 = delta_3 * Theta2(:, 2:end) .* sigmoidGradient(z_2);
+% 5000 x 10 * 10 x 25 .* 5000 x 25 => 5000x25
+
+big_delta_2 = delta_3' * a_2; % 10x26
+big_delta_1 = delta_2' * X; % 25 x 401
+
+Theta2_grad = big_delta_2 ./ m;
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + Theta2(:, 2:end) .* lambda / m;
+Theta1_grad = big_delta_1 ./ m;
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + Theta1(:, 2:end) .* lambda / m;
 
 % =========================================================================
 
