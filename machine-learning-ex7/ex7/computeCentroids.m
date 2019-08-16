@@ -26,7 +26,14 @@ centroids = zeros(K, n);
 % Note: You can use a for-loop over the centroids to compute this.
 %
 
-
+for i = 1:K
+  x = X(idx == i, :);
+  if (isempty(x))
+    error("Centroid %d does not have any samples to it\n", i);
+  else
+    centroids(i,:) = mean(x);
+  end
+end
 
 
 
